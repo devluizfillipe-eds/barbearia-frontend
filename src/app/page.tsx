@@ -22,18 +22,8 @@ export default function Home() {
   const { data: services, isLoading: loadingServices } = useQuery<Service[]>({
     queryKey: ['services'],
     queryFn: async () => {
-      // Mock data if API fails or for initial dev
-      try {
-        const res = await api.get('/services');
-        return res.data;
-      } catch (e) {
-        console.warn('Failed to fetch services, using mock data', e);
-        return [
-          { id: 1, name: 'Corte de Cabelo', price: 35, avgDuration: 30, isActive: true },
-          { id: 2, name: 'Barba', price: 25, avgDuration: 20, isActive: true },
-          { id: 3, name: 'Corte + Barba', price: 55, avgDuration: 50, isActive: true },
-        ];
-      }
+      const res = await api.get('/services');
+      return res.data;
     },
   });
 
@@ -41,17 +31,8 @@ export default function Home() {
   const { data: barbers, isLoading: loadingBarbers } = useQuery<User[]>({
     queryKey: ['barbers'],
     queryFn: async () => {
-      try {
-        const res = await api.get('/users'); // Assuming /users returns all users, need to filter by role or use specific endpoint if exists
-        // Filter for BARBER role and isOnline (if applicable)
-        return res.data.filter((u: User) => u.role === Role.BARBER); 
-      } catch (e) {
-         console.warn('Failed to fetch barbers, using mock data', e);
-         return [
-           { id: 1, name: 'João Barbeiro', username: 'joao', role: Role.BARBER, isOnline: true },
-           { id: 2, name: 'Pedro Tesoura', username: 'pedro', role: Role.BARBER, isOnline: true },
-         ];
-      }
+      const res = await api.get('/users/barbers');
+      return res.data;
     },
     enabled: step === 'barber',
   });
@@ -175,6 +156,8 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {loadingBarbers ? (
                 <p className="text-center col-span-full text-muted-foreground">Carregando barbeiros...</p>
+              ) : barbers?.length === 0 ? (
+                <p className="text-center col-span-full text-muted-foreground">Não existem barbeiros disponíveis no momento.</p>
               ) : (
                 barbers?.map((barber) => (
                   <Card 
@@ -261,10 +244,10 @@ export default function Home() {
           <Button variant="ghost" size="sm" className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
             Sou Cliente
           </Button>
-          <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground" onClick={() => router.push('/auth/login')}>
+          <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground" onClick={() => router.push('/login')}>
             Sou Barbeiro
           </Button>
-          <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground" onClick={() => router.push('/auth/login')}>
+          <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground" onClick={() => router.push('/login')}>
             Sou Admin
           </Button>
         </div>

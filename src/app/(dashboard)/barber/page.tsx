@@ -14,8 +14,20 @@ import { useRouter } from 'next/navigation';
 export default function BarberDashboard() {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'queue' | 'results'>('queue');
+  const [daysFilter, setDaysFilter] = useState('0'); // 0 = Hoje, 7 = 7 dias, 30 = 30 dias
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  // Fetch Current User Profile (for real-time status)
+  const { data: profile } = useQuery<User>({
+    queryKey: ['barberProfile', user?.id],
+    queryFn: async () => {
+      const res = await api.get(`/users/${user?.id}`);
+      return res.data;
+    },
+    enabled: !!user?.id,
+    refetchInterval: 5000,
+  });
 
   // Fetch Barber Queue
   const { data: queue, isLoading: loadingQueue } = useQuery<QueueItem[]>({
@@ -35,14 +47,14 @@ export default function BarberDashboard() {
 
   // Fetch Barber Stats
   const { data: stats, isLoading: loadingStats } = useQuery({
-    queryKey: ['barberStats'],
+    queryKey: ['barberStats', daysFilter],
     queryFn: async () => {
       try {
-        const res = await api.get('/dashboard/barber');
+        const res = await api.get(`/dashboard/barber?days=${daysFilter}`);
         return res.data;
       } catch (e) {
         console.warn('Failed to fetch stats', e);
-        return { todayServices: 5, todayRevenue: 150, history: [] };
+        return null;
       }
     },
     enabled: activeTab === 'results' && !!user,
@@ -55,8 +67,7 @@ export default function BarberDashboard() {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['barberProfile'] }); // Assuming we fetch profile somewhere or update user context
-      alert('Status atualizado!');
+      queryClient.invalidateQueries({ queryKey: ['barberProfile'] });
     },
   });
 
@@ -75,6 +86,13 @@ export default function BarberDashboard() {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin" /></div>;
   }
 
+  const isOnline = profile?.isOnline ?? user.isOnline;
+
+  // Recharts Imports (Dynamic to avoid SSR issues if needed, but standard import works in Next 14 client components usually)
+  const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } = require('recharts');
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -86,13 +104,13 @@ export default function BarberDashboard() {
           </div>
           <div className="flex gap-2">
             <Button 
-              variant={user.isOnline ? "default" : "destructive"} 
+              variant={isOnline ? "default" : "destructive"} 
               size="sm"
               onClick={() => toggleOnline.mutate()}
               disabled={toggleOnline.isPending}
             >
               <Power className="mr-2 h-4 w-4" />
-              {user.isOnline ? 'Online' : 'Offline'}
+              {isOnline ? 'Online' : 'Offline'}
             </Button>
             <Button variant="ghost" size="icon" onClick={logout}>
               <LogOut className="h-5 w-5" />
@@ -147,7 +165,7 @@ export default function BarberDashboard() {
                         </span>
                       </div>
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> Serviço ID: {item.serviceId} {/* TODO: Fetch service name */}
+                        <Clock className="h-3 w-3" /> Serviço ID: {item.serviceId}
                       </p>
                     </div>
                     
@@ -185,30 +203,104 @@ export default function BarberDashboard() {
 
         {activeTab === 'results' && (
           <div className="space-y-6">
-             <h2 className="text-lg font-semibold mb-4">Desempenho Hoje</h2>
+             <div className="flex justify-between items-center">
+               <h2 className="text-lg font-semibold">Desempenho</h2>
+               <select 
+                 className="bg-card border border-input rounded-md p-2 text-sm"
+                 value={daysFilter}
+                 onChange={(e) => setDaysFilter(e.target.value)}
+               >
+                 <option value="0">Hoje</option>
+                 <option value="7">Últimos 7 dias</option>
+                 <option value="30">Últimos 30 dias</option>
+               </select>
+             </div>
+
              {loadingStats ? (
                <Loader2 className="animate-spin mx-auto" />
              ) : (
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <Card>
-                   <CardHeader className="pb-2">
-                     <CardTitle className="text-sm font-medium text-muted-foreground">Atendimentos</CardTitle>
-                   </CardHeader>
-                   <CardContent>
-                     <div className="text-2xl font-bold">{stats?.todayServices || 0}</div>
-                   </CardContent>
-                 </Card>
-                 <Card>
-                   <CardHeader className="pb-2">
-                     <CardTitle className="text-sm font-medium text-muted-foreground">Receita Estimada</CardTitle>
-                   </CardHeader>
-                   <CardContent>
-                     <div className="text-2xl font-bold text-primary">R$ {stats?.todayRevenue || 0}</div>
-                   </CardContent>
-                 </Card>
-               </div>
+               <>
+                 {/* Summary Cards */}
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <Card>
+                     <CardHeader className="pb-2">
+                       <CardTitle className="text-sm font-medium text-muted-foreground">Atendimentos</CardTitle>
+                     </CardHeader>
+                     <CardContent>
+                       <div className="text-2xl font-bold">{stats?.summary?.totalServices || 0}</div>
+                     </CardContent>
+                   </Card>
+                   <Card>
+                     <CardHeader className="pb-2">
+                       <CardTitle className="text-sm font-medium text-muted-foreground">Receita Total</CardTitle>
+                     </CardHeader>
+                     <CardContent>
+                       <div className="text-2xl font-bold text-primary">R$ {stats?.summary?.totalRevenue?.toFixed(2) || '0.00'}</div>
+                     </CardContent>
+                   </Card>
+                   <Card>
+                     <CardHeader className="pb-2">
+                       <CardTitle className="text-sm font-medium text-muted-foreground">Ticket Médio</CardTitle>
+                     </CardHeader>
+                     <CardContent>
+                       <div className="text-2xl font-bold">R$ {stats?.summary?.averageTicket?.toFixed(2) || '0.00'}</div>
+                     </CardContent>
+                   </Card>
+                 </div>
+
+                 {/* Charts */}
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                   {/* Daily History Chart */}
+                   <Card className="p-4">
+                     <h3 className="text-md font-semibold mb-4">Histórico de Receita</h3>
+                     <div className="h-[300px] w-full">
+                       <ResponsiveContainer width="100%" height="100%">
+                         <BarChart data={stats?.dailyHistory || []}>
+                           <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                           <XAxis dataKey="date" fontSize={12} />
+                           <YAxis fontSize={12} />
+                           <Tooltip 
+                             contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
+                             itemStyle={{ color: 'var(--foreground)' }}
+                           />
+                           <Bar dataKey="revenue" fill="var(--primary)" radius={[4, 4, 0, 0]} name="Receita (R$)" />
+                         </BarChart>
+                       </ResponsiveContainer>
+                     </div>
+                   </Card>
+
+                   {/* Service Breakdown Chart */}
+                   <Card className="p-4">
+                     <h3 className="text-md font-semibold mb-4">Serviços Realizados</h3>
+                     <div className="h-[300px] w-full">
+                       <ResponsiveContainer width="100%" height="100%">
+                         <PieChart>
+                           <Pie
+                             data={stats?.serviceBreakdown || []}
+                             cx="50%"
+                             cy="50%"
+                             innerRadius={60}
+                             outerRadius={80}
+                             paddingAngle={5}
+                             dataKey="count"
+                             nameKey="name"
+                           >
+                             {(stats?.serviceBreakdown || []).map((entry: any, index: number) => (
+                               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                             ))}
+                           </Pie>
+                           <Tooltip 
+                             contentStyle={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
+                             itemStyle={{ color: 'var(--foreground)' }}
+                           />
+                           <Legend />
+                         </PieChart>
+                       </ResponsiveContainer>
+                     </div>
+                   </Card>
+                 </div>
+               </>
              )}
-             {/* Add chart here later with Recharts */}
           </div>
         )}
       </div>

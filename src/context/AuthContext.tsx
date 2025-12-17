@@ -44,9 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     // Redirect based on role
     if (newUser.role === Role.ADMIN) {
-      router.push('/dashboard/admin');
+      router.push('/admin');
     } else if (newUser.role === Role.BARBER) {
-      router.push('/dashboard/barber');
+      router.push('/barber');
     } else {
       router.push('/');
     }
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     delete api.defaults.headers.common['Authorization'];
-    router.push('/auth/login');
+    router.push('/login');
   };
 
   return (

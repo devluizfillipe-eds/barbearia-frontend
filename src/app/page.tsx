@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Check, Scissors, User as UserIcon, Calendar, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function Home() {
   const router = useRouter();
@@ -82,19 +83,24 @@ export default function Home() {
   return (
     <main className="min-h-screen pb-20 bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border p-4">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Scissors className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold text-foreground">Barbearia <span className="text-primary">Premium</span></h1>
+      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b-2 border-primary p-4">
+        <div className="container mx-auto flex flex-col items-center justify-center gap-4">
+          <div className="relative w-32 h-32">
+            <Image 
+              src="/logo.jpg" 
+              alt="Bozo's Barber Shop" 
+              fill
+              className="object-contain rounded-full"
+              priority
+            />
           </div>
         </div>
       </header>
 
       <div className="container mx-auto p-4 space-y-6">
         <div className="text-center space-y-2 py-8">
-          <h2 className="text-3xl font-bold tracking-tight">Como podemos te ajudar?</h2>
-          <p className="text-muted-foreground">Escolha os serviços para começar seu agendamento.</p>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">Em que podemos te ajudar?</h2>
+          <p className="text-muted-foreground">escolha um serviço e entre na fila</p>
         </div>
 
         {/* Step 1: Services */}
@@ -108,19 +114,21 @@ export default function Home() {
                   <Card 
                     key={service.id}
                     className={cn(
-                      "cursor-pointer transition-all hover:border-primary/50",
-                      selectedServices.includes(service.id) ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
+                      "cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 border-2 rounded-2xl",
+                      selectedServices.includes(service.id) 
+                        ? "border-primary bg-primary/10 shadow-md shadow-primary/30" 
+                        : "border-primary/40 bg-card"
                     )}
                     onClick={() => toggleService(service.id)}
                   >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-lg font-medium">{service.name}</CardTitle>
-                      {selectedServices.includes(service.id) && <Check className="h-5 w-5 text-primary" />}
+                      <CardTitle className="text-lg font-medium text-foreground">{service.name}</CardTitle>
+                      {selectedServices.includes(service.id) && <Check className="h-6 w-6 text-primary" />}
                     </CardHeader>
                     <CardContent>
-                      <div className="flex justify-between text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {service.avgDuration} min</span>
-                        <span className="font-bold text-foreground">R$ {Number(service.price).toFixed(2)}</span>
+                      <div className="flex justify-between text-sm">
+                        <span className="flex items-center gap-1 text-muted-foreground"><Clock className="h-3 w-3" /> {service.avgDuration} min</span>
+                        <span className="font-bold text-primary text-base">R$ {Number(service.price).toFixed(2)}</span>
                       </div>
                     </CardContent>
                   </Card>
@@ -128,19 +136,19 @@ export default function Home() {
               )}
             </div>
 
-            <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/80 backdrop-blur-md border-t border-border md:static md:bg-transparent md:border-0">
+            <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t-2 border-primary md:static md:bg-transparent md:border-0">
               <div className="container mx-auto flex items-center justify-between mb-4 md:mb-0">
                 <div className="flex flex-col">
-                  <span className="text-sm text-muted-foreground">Total estimado</span>
+                  <span className="text-sm text-muted-foreground">Total</span>
                   <span className="text-xl font-bold text-primary">R$ {totalPrice.toFixed(2)} <span className="text-xs text-muted-foreground font-normal">/ {totalDuration} min</span></span>
                 </div>
                 <Button 
                   size="lg" 
                   disabled={selectedServices.length === 0}
                   onClick={() => setStep('barber')}
-                  className="px-8"
+                  className="px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full"
                 >
-                  Confirmar
+                  confirmar
                 </Button>
               </div>
             </div>
@@ -163,16 +171,18 @@ export default function Home() {
                   <Card 
                     key={barber.id}
                     className={cn(
-                      "cursor-pointer transition-all hover:border-primary/50 flex flex-col items-center text-center p-6",
-                      selectedBarber === barber.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border"
+                      "cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 border-2 rounded-2xl flex flex-col items-center text-center p-6",
+                      selectedBarber === barber.id 
+                        ? "border-primary bg-primary/10 shadow-md shadow-primary/30" 
+                        : "border-primary/40 bg-card"
                     )}
                     onClick={() => setSelectedBarber(barber.id)}
                   >
-                    <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-4">
-                      <UserIcon className="h-10 w-10 text-muted-foreground" />
+                    <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-4 border-2 border-primary/50">
+                      <UserIcon className="h-10 w-10 text-primary" />
                     </div>
-                    <CardTitle className="text-lg">{barber.name}</CardTitle>
-                    <CardDescription className={cn("text-sm", barber.isOnline ? "text-green-500" : "text-muted-foreground")}>
+                    <CardTitle className="text-lg text-foreground">{barber.name}</CardTitle>
+                    <CardDescription className={cn("text-sm font-medium", barber.isOnline ? "text-green-500" : "text-muted-foreground")}>
                       {barber.isOnline ? "Online" : "Offline"}
                     </CardDescription>
                   </Card>
@@ -180,13 +190,13 @@ export default function Home() {
               )}
             </div>
 
-            <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/80 backdrop-blur-md border-t border-border md:static md:bg-transparent md:border-0 flex justify-end">
+            <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t-2 border-primary md:static md:bg-transparent md:border-0 flex justify-end">
                <div className="container mx-auto flex justify-end">
                 <Button 
                   size="lg" 
                   disabled={!selectedBarber}
                   onClick={() => setStep('confirm')}
-                  className="px-8"
+                  className="px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full"
                 >
                   Confirmar Barbeiro
                 </Button>
@@ -201,23 +211,23 @@ export default function Home() {
             <Button variant="ghost" onClick={() => setStep('barber')} className="mb-4">← Voltar</Button>
             <h3 className="text-xl font-semibold">Seus dados</h3>
             
-            <Card>
+            <Card className="border-2 border-primary/40 rounded-2xl">
               <CardContent className="pt-6 space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Nome Completo</label>
+                  <label className="text-sm font-medium text-foreground">Nome Completo</label>
                   <input 
                     type="text" 
-                    className="w-full p-2 rounded-md bg-secondary border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    className="w-full p-3 rounded-lg bg-secondary border-2 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/50 outline-none transition-all text-foreground"
                     placeholder="Seu nome"
                     value={clientName}
                     onChange={(e) => setClientName(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Telefone</label>
+                  <label className="text-sm font-medium text-foreground">Telefone</label>
                   <input 
                     type="tel" 
-                    className="w-full p-2 rounded-md bg-secondary border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                    className="w-full p-3 rounded-lg bg-secondary border-2 border-primary/30 focus:border-primary focus:ring-2 focus:ring-primary/50 outline-none transition-all text-foreground"
                     placeholder="(11) 99999-9999"
                     value={clientPhone}
                     onChange={(e) => setClientPhone(e.target.value)}
@@ -228,7 +238,7 @@ export default function Home() {
 
             <Button 
               size="lg" 
-              className="w-full"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full"
               disabled={!clientName || !clientPhone || createQueueItem.isPending}
               onClick={() => createQueueItem.mutate()}
             >
@@ -240,15 +250,15 @@ export default function Home() {
 
       {/* Floating Action Button */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-        <div className="flex items-center bg-secondary/90 backdrop-blur-md border border-border rounded-full p-1 shadow-lg">
-          <Button variant="ghost" size="sm" className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
-            Sou Cliente
+        <div className="flex items-center bg-card/95 backdrop-blur-md border-2 border-primary rounded-full p-1 shadow-lg shadow-primary/20">
+          <Button variant="ghost" size="sm" className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
+            sou cliente
           </Button>
-          <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground" onClick={() => router.push('/login')}>
-            Sou Barbeiro
+          <Button variant="ghost" size="sm" className="rounded-full text-foreground hover:text-primary hover:bg-primary/10 font-medium" onClick={() => router.push('/login')}>
+            sou barbeiro
           </Button>
-          <Button variant="ghost" size="sm" className="rounded-full text-muted-foreground hover:text-foreground" onClick={() => router.push('/login')}>
-            Sou Admin
+          <Button variant="ghost" size="sm" className="rounded-full text-foreground hover:text-primary hover:bg-primary/10 font-medium" onClick={() => router.push('/login')}>
+            sou admin
           </Button>
         </div>
       </div>

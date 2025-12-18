@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Loader2, User as UserIcon, Clock, CheckCircle, XCircle, LogOut, Power } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function BarberDashboard() {
   const { user, logout } = useAuth();
@@ -96,11 +97,21 @@ export default function BarberDashboard() {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <header className="bg-card border-b border-border p-4 sticky top-0 z-10">
+      <header className="bg-card border-b-2 border-primary p-4 sticky top-0 z-10">
         <div className="container mx-auto flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold">Painel do Barbeiro</h1>
-            <p className="text-sm text-muted-foreground">Olá, {user.name}</p>
+          <div className="flex items-center gap-4">
+            <div className="relative w-12 h-12">
+              <Image 
+                src="/logo.jpg" 
+                alt="Bozo's Barber Shop" 
+                fill
+                className="object-contain rounded-full"
+              />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Painel do Barbeiro</h1>
+              <p className="text-sm text-muted-foreground">Olá, {user.name}</p>
+            </div>
           </div>
           <div className="flex gap-2">
             <Button 
@@ -108,11 +119,12 @@ export default function BarberDashboard() {
               size="sm"
               onClick={() => toggleOnline.mutate()}
               disabled={toggleOnline.isPending}
+              className={isOnline ? "bg-primary hover:bg-primary/90 text-primary-foreground" : ""}
             >
               <Power className="mr-2 h-4 w-4" />
               {isOnline ? 'Online' : 'Offline'}
             </Button>
-            <Button variant="ghost" size="icon" onClick={logout}>
+            <Button variant="ghost" size="icon" onClick={logout} className="hover:bg-primary/10 hover:text-primary">
               <LogOut className="h-5 w-5" />
             </Button>
           </div>

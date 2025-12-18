@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -34,10 +35,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm border-primary/20 shadow-2xl">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      <div className="mb-8">
+        <div className="relative w-40 h-40">
+          <Image 
+            src="/logo.jpg" 
+            alt="Bozo's Barber Shop" 
+            fill
+            className="object-contain rounded-full"
+            priority
+          />
+        </div>
+      </div>
+      <Card className="w-full max-w-sm border-2 border-primary/40 shadow-2xl shadow-primary/10 rounded-2xl">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Acesso Restrito</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center text-foreground">Acesso Restrito</CardTitle>
           <CardDescription className="text-center">
             Entre com suas credenciais de barbeiro ou administrador
           </CardDescription>
@@ -45,34 +57,36 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm text-center">
+              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm text-center border border-destructive/20">
                 {error}
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="username">Usuário</Label>
+              <Label htmlFor="username" className="text-foreground">Usuário</Label>
               <Input 
                 id="username" 
-                placeholder="admin" 
+                placeholder="" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                className="border-2 border-primary/30 focus:border-primary bg-secondary text-foreground"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+              <Label htmlFor="password" className="text-foreground">Senha</Label>
               <Input 
                 id="password" 
                 type="password" 
-                placeholder="••••••••" 
+                placeholder="" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                className="border-2 border-primary/30 focus:border-primary bg-secondary text-foreground"
               />
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" type="submit" disabled={isLoading}>
+            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-full" type="submit" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Entrar
             </Button>

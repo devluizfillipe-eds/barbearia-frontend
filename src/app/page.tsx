@@ -81,7 +81,7 @@ export default function Home() {
     .reduce((acc, curr) => acc + Number(curr.price), 0) || 0;
 
   return (
-    <main className="min-h-screen pb-20 bg-background">
+    <main className="min-h-screen pb-48 bg-background">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b-2 border-primary p-4">
         <div className="container mx-auto flex flex-col items-center justify-center gap-4">
@@ -136,7 +136,7 @@ export default function Home() {
               )}
             </div>
 
-            <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t-2 border-primary md:static md:bg-transparent md:border-0">
+            <div className="fixed bottom-0 left-0 right-0 p-4 pb-24 bg-background border-t-2 border-primary md:static md:bg-transparent md:border-0 md:pb-0">
               <div className="container mx-auto flex items-center justify-between mb-4 md:mb-0">
                 <div className="flex flex-col">
                   <span className="text-sm text-muted-foreground">Total</span>
@@ -190,7 +190,7 @@ export default function Home() {
               )}
             </div>
 
-            <div className="fixed bottom-20 left-0 right-0 p-4 bg-background/95 backdrop-blur-md border-t-2 border-primary md:static md:bg-transparent md:border-0 flex justify-end">
+            <div className="fixed bottom-0 left-0 right-0 p-4 pb-24 bg-background border-t-2 border-primary md:static md:bg-transparent md:border-0 md:pb-0 flex justify-end">
                <div className="container mx-auto flex justify-end">
                 <Button 
                   size="lg" 
@@ -250,7 +250,7 @@ export default function Home() {
 
       {/* Floating Action Button */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-        <div className="flex items-center bg-card/95 backdrop-blur-md border-2 border-primary rounded-full p-1 shadow-lg shadow-primary/20">
+        <div className="flex items-center bg-card border-2 border-primary rounded-full p-1 shadow-lg shadow-primary/20">
           <Button variant="ghost" size="sm" className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
             sou cliente
           </Button>

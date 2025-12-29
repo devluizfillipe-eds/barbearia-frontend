@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { QueueItem, QueueStatus, User } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, User as UserIcon, Clock, CheckCircle, XCircle, LogOut, Power } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -114,16 +115,16 @@ export default function BarberDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button 
-              variant={isOnline ? "default" : "destructive"} 
-              size="sm"
-              onClick={() => toggleOnline.mutate()}
-              disabled={toggleOnline.isPending}
-              className={isOnline ? "bg-primary hover:bg-primary/90 text-primary-foreground" : ""}
-            >
-              <Power className="mr-2 h-4 w-4" />
-              {isOnline ? 'Online' : 'Offline'}
-            </Button>
+            <div className="flex flex-col items-center mr-4 relative">
+              <Switch 
+                checked={!!isOnline}
+                onChange={() => toggleOnline.mutate()}
+                disabled={toggleOnline.isPending}
+              />
+              <span className={cn("absolute top-full mt-1 text-[10px] font-medium whitespace-nowrap", isOnline ? "text-green-500" : "text-muted-foreground")}>
+                {isOnline ? 'você está online' : 'você está offline'}
+              </span>
+            </div>
             <Button variant="ghost" size="icon" onClick={logout} className="hover:bg-primary/10 hover:text-primary">
               <LogOut className="h-5 w-5" />
             </Button>

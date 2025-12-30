@@ -33,7 +33,8 @@ export default function Home() {
     queryKey: ['barbers'],
     queryFn: async () => {
       const res = await api.get('/users/barbers');
-      return res.data;
+      // Client-side filter as a safeguard for production issues
+      return res.data.filter((barber: User) => barber.isOnline);
     },
     enabled: step === 'barber',
   });
